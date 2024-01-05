@@ -1,15 +1,15 @@
 {
   "name": "family-friendly",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/app.js",
+  "description": "Detect or mask out, bad words in a string",
+  "main": "dist/FamilyFriendly.js",
   "engines": {
     "node": "18.x"
   },
   "scripts": {
     "build": "babel src -d dist --extensions \".ts,.tsx\"",
-    "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "start": "node dist/FamilyFriendly.js",
+    "dev": "nodemon src/FamilyFriendly.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts",
