@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",
     "target": "ES2021",
     "module": "ESNext",
     "esModuleInterop": true,
     "strict": true,
     "moduleResolution": "node",
-    "noEmit": true
+    "declaration": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
