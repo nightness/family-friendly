@@ -23,7 +23,7 @@ export interface FamilyFriendlyOptions {
 // This class is used to detect or mask out, bad words in a string
 export class FamilyFriendly {
   // The list of bad words
-  private badWords = new Set<string>();
+  private badWords: string[] = [];
 
   constructor(options?: FamilyFriendlyOptions) {
     const allFalse =
@@ -92,7 +92,7 @@ export class FamilyFriendly {
       allWords.push(...badSpanishWords);
     }
 
-    this.badWords = new Set(allWords);
+    this.badWords = allWords.sort((a, b) => b.length - a.length);
   }
 
   // Returns true if the string contains a bad word
