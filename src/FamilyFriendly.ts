@@ -23,9 +23,13 @@ export interface FamilyFriendlyOptions {
 // This class is used to detect or mask out, bad words in a string
 export class FamilyFriendly {
   // The list of bad words
-  private badWords: string[] = [];
+  private badWords: string[];
+  private badWordPatterns: RegExp[];
 
   constructor(options?: FamilyFriendlyOptions) {
+    this.badWords = [];
+    this.badWordPatterns = [];
+
     const allFalse =
       options &&
       !options.includeEnglish &&
@@ -92,7 +96,62 @@ export class FamilyFriendly {
       allWords.push(...badSpanishWords);
     }
 
+    // Derive bad words from the existing bad words, removing duplicate letters in a word
+    const derivedWords: string[] = [];
+    for (const word of allWords) {
+      const letters = word.split("");
+      const uniqueLetters = letters.filter(
+        (letter, index) => letters.indexOf(letter) === index
+      );
+      const stubWord = uniqueLetters.join("");
+
+      // No duplicate letters
+      if (allWords.includes(stubWord)) continue;
+
+      // Add the stub word to the list of derived words
+      derivedWords.push(stubWord);
+    }
+
+    // Add the derived words to the list of all words
+    allWords.push(...derivedWords);
+
+    // Flatten the array of bad words and create regex patterns
     this.badWords = allWords.sort((a, b) => b.length - a.length);
+    this.badWordPatterns = this.badWords.map(
+      (word) => new RegExp(this.createRegexPattern(word), "gi")
+    );
+  }
+
+  private createRegexPattern(word: string): string {
+    const escapeRegExp = (string: string) =>
+      string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    // Define substitutions
+    const substitutions: { [key: string]: string } = {
+      a: "[a@4]",
+      e: "[e3]",
+      i: "[i1!]",
+      o: "[o0]",
+      s: "[s$5]",
+      t: "[t7]",
+      b: "[b8]",
+      g: "[g6]",
+      l: "[l1]",
+      q: "[q9]",
+      z: "[z2]",
+    };
+
+    // Replace each character with its substitutions (if any)
+    const pattern = word
+      .split("")
+      .map((char) => {
+        const sub = substitutions[char.toLowerCase()];
+        return sub ? sub : escapeRegExp(char);
+      })
+      .join("");
+
+    // Return the pattern with word boundaries
+    return `\\b${pattern}\\b`;
   }
 
   // Returns true if the string contains a bad word
@@ -106,10 +165,56 @@ export class FamilyFriendly {
   }
 
   // Returns a string with bad words masked out
-  public maskBadWords(str: string, maskAs: string = "🤡"): string {
+  public maskBadWords(str: string, maskAs: string = "*"): string {
     for (const badWord of this.badWords) {
-      str = str.replaceAll(badWord, maskAs.repeat(badWord.length));
+      str = str.replace(
+        new RegExp(this.createRegexPattern(badWord), "gi"),
+        maskAs.repeat(badWord.length)
+      );
     }
     return str;
   }
+
+  // Like maskBadWords, but replaces the bad word with the provided replacement
+  public replaceBadWords(
+    str: string,
+    replacementWordForABadWord: string = "[CENSORED]"
+  ): string {
+    for (const badWord of this.badWords) {
+      str = str.replace(
+        new RegExp(this.createRegexPattern(badWord), "gi"),
+        replacementWordForABadWord
+      );
+    }
+    return str;
+  }
+
+  public addWords(words: string[]): void {
+    words.forEach((word) => {
+      this.badWords.push(word);
+      this.badWordPatterns.push(
+        new RegExp(this.createRegexPattern(word), "gi")
+      );
+    });
+  }
+
+  public removeWords(words: string[]): void {
+    words.forEach((word) => {
+      const index = this.badWords.indexOf(word);
+      if (index > -1) {
+        this.badWords.splice(index, 1);
+        this.badWordPatterns.splice(index, 1);
+      }
+    });
+  }
 }
+
+/*
+const familyFriendly = new FamilyFriendly();
+
+const testString = "Don't be an ash0le ashole assh0le asshole";
+console.log("Original:", testString);
+console.log("Masked:", familyFriendly.maskBadWords(testString));
+console.log("Contains bad word:", familyFriendly.containsBadWord(testString));
+console.log("Replaced:", familyFriendly.replaceBadWords(testString));
+*/

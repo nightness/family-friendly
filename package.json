@@ -1,21 +1,20 @@
 {
   "name": "family-friendly",
-  "version": "0.1.1",
-  "description": "Detect or mask out, bad words in a string",
+  "version": "0.4.1",
+  "description": "Detect, replace, or mask out bad words in a string",
   "main": "dist/FamilyFriendly.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/nightness/family-friendly"
   },
   "scripts": {
-    "deploy": "yarn clean && yarn build && npm publish",
-    "build": "babel src --out-dir dist --extensions '.ts,.tsx' && tsc --emitDeclarationOnly",
-    "start": "node dist/FamilyFriendly.js",
+    "deploy": "yarn clean && yarn build && npm publish --access public",
+    "build": "yarn clean && babel src --out-dir dist --extensions '.ts,.tsx' && tsc --emitDeclarationOnly",
+    "start": "yarn build && node dist/FamilyFriendly.js",
     "dev": "nodemon src/FamilyFriendly.ts",
     "test": "echo 'Skipping tests'",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint . --ext .ts --fix",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
     "format": "prettier --write \"**/*.{js,ts,json}\""
